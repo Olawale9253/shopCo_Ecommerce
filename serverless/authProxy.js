@@ -1,19 +1,14 @@
 import { Buffer } from "node:buffer";
 import process from "node:process";
 
-export default async function handler(request, response) {
+export const proxyAuthRequest = (endpoint) => async (request, response) => {
   const apiUrl = process.env.SHOPCO_API_URL;
 
   if (!apiUrl) {
     return response.status(503).json({ error: "Authentication service is not configured." });
   }
 
-  const path = request.query.path;
-  const segments = Array.isArray(path) ? path : [path].filter(Boolean);
-  const upstreamUrl = new URL(
-    `/api/auth/${segments.map((segment) => encodeURIComponent(segment)).join("/")}`,
-    apiUrl,
-  );
+  const upstreamUrl = new URL(`/api/auth/${endpoint}`, apiUrl);
   const headers = {};
 
   if (request.headers.cookie) headers.cookie = request.headers.cookie;
@@ -40,4 +35,4 @@ export default async function handler(request, response) {
     console.error("Authentication service request failed:", error);
     return response.status(502).json({ error: "Authentication service is unavailable." });
   }
-}
+};

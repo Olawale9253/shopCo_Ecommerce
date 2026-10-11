@@ -23,7 +23,7 @@ Vite serves the frontend and proxies `/api` requests to the Express server on po
 
 Deploy the Express API (`npm run start`) to a Node.js host with persistent disk storage. Set `NODE_ENV=production` and point `SHOPCO_DB_PATH` at a file on that persistent disk, for example `/var/data/shopco.sqlite`. The database must not be stored on an ephemeral filesystem.
 
-For the Vercel frontend, set the runtime environment variable `SHOPCO_API_URL` to the origin of the deployed Express API, for example `https://shopco-api.example.com`. The Vercel function at `/api/auth/*` proxies account requests and session cookies to that API, keeping the browser connection same-origin.
+For the Vercel frontend, set the runtime environment variable `SHOPCO_API_URL` to the origin of the deployed Express API, for example `https://shopco-api.example.com`. Explicit Vercel functions at `/api/auth/signup`, `/api/auth/login`, `/api/auth/me`, and `/api/auth/logout` proxy account requests and session cookies to that API, keeping the browser connection same-origin. Redeploy the Vercel project after adding or changing this variable.
 
 ## API
 
