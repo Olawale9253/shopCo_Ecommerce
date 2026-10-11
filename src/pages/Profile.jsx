@@ -12,6 +12,8 @@ const Profile = () => {
   const dispatch = useDispatch();
   const savedProfile = useSelector((state) => state.profile);
   const authUser = useSelector((state) => state.auth.user);
+  const authStatus = useSelector((state) => state.auth.status);
+  const authError = useSelector((state) => state.auth.error);
   const cartCount = useSelector((state) => state.cart.items.reduce((total, item) => total + item.quantity, 0));
   const navigate = useNavigate();
   const [profile, setProfile] = useState({
@@ -32,8 +34,12 @@ const Profile = () => {
   };
 
   const signOut = async () => {
-    await dispatch(logoutUser());
-    navigate("/", { replace: true });
+    try {
+      await dispatch(logoutUser()).unwrap();
+      navigate("/login", { replace: true });
+    } catch {
+      // The auth slice retains the API error for display below.
+    }
   };
 
   return (
@@ -45,7 +51,14 @@ const Profile = () => {
         <header className="profile-heading">
           <span className="eyebrow">Your account</span>
           <h1 className="section-heading">Profile</h1>
-          {authUser ? <button className="profile-signout" type="button" onClick={signOut}><LogOut size={15} /> Sign out</button> : null}
+          {authUser ? (
+            <>
+              <button className="profile-signout" type="button" onClick={signOut} disabled={authStatus === "submitting"}>
+                <LogOut size={15} /> {authStatus === "submitting" ? "Signing out..." : "Sign out"}
+              </button>
+              {authError ? <p className="profile-status" role="alert">{authError}</p> : null}
+            </>
+          ) : null}
         </header>
         <div className="profile-layout">
           <section className="profile-card" aria-labelledby="profile-details-title">

@@ -44,8 +44,12 @@ export const loginUser = createAsyncThunk("auth/login", async (credentials, { re
   }
 });
 
-export const logoutUser = createAsyncThunk("auth/logout", async () => {
-  await postAuth("logout", {});
+export const logoutUser = createAsyncThunk("auth/logout", async (_, { rejectWithValue }) => {
+  try {
+    await postAuth("logout", {});
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
 });
 
 const authSlice = createSlice({
@@ -89,9 +93,18 @@ const authSlice = createSlice({
         state.status = "ready";
         state.error = payload;
       })
+      .addCase(logoutUser.pending, (state) => {
+        state.status = "submitting";
+        state.error = null;
+      })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.status = "ready";
+        state.error = null;
+      })
+      .addCase(logoutUser.rejected, (state, { payload }) => {
+        state.status = "ready";
+        state.error = payload;
       });
   },
 });
