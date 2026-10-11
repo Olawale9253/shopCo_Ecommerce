@@ -1,266 +1,39 @@
-# Fake Store
+# Shop.co
 
-A React e-commerce application built with **React**, **Redux Toolkit Query (RTK Query)**, and **Tailwind CSS**.
-
-The project uses the [Fake Store API](https://fakestoreapi.com/) to retrieve product information.
-
-## Technologies
-
-* React
-* Vite
-* Redux Toolkit
-* RTK Query
-* Tailwind CSS
-* JavaScript
+A React storefront built with Vite, Redux Toolkit Query, and Express.
 
 ## Features
 
-* Fetch all products from the Fake Store API
-* Fetch an individual product by ID
-* Manage API requests with RTK Query
-* Loading and API state management
-* Responsive UI with Tailwind CSS
+- Product listings from DummyJSON, filtered to fashion categories
+- Product details, search, sorting, and shopping cart
+- Signup, login, and persistent account sessions
 
-## API
+## Run locally
 
-This project uses the Fake Store API:
-
-```text
-https://fakestoreapi.com
-```
-
-### Get all products
-
-```text
-GET /products
-```
-
-### Get a single product
-
-```text
-GET /products/:id
-```
-
-## Installation
-
-Clone the repository:
-
-```bash
-git clone <your-repository-url>
-```
-
-Navigate into the project:
-
-```bash
-cd <project-name>
-```
-
-Install dependencies:
+Use Node.js 22.5 or newer for the built-in SQLite support.
 
 ```bash
 npm install
-```
-
-Start the development server:
-
-```bash
 npm run dev
 ```
 
-The application will then be available at the local URL provided by Vite.
+Vite serves the frontend and proxies `/api` requests to the Express server on port 3001. Product requests use `https://dummyjson.com` by default; set `VITE_API_BASE_URL` in `.env` only if you want to use a different compatible API.
 
-## Environment Variables
+## Deploy authentication
 
-Set the API base URL in a `.env` file in the root of the project:
+Deploy the Express API (`npm run start`) to a Node.js host with persistent disk storage. Set `NODE_ENV=production` and point `SHOPCO_DB_PATH` at a file on that persistent disk, for example `/var/data/shopco.sqlite`. The database must not be stored on an ephemeral filesystem.
 
-```env
-VITE_API_BASE_URL=https://dummyjson.com
-```
-
-The application uses this value as the base URL for API requests. Do not commit `.env` files containing local configuration or secrets.
-
-## RTK Query
-
-API requests are managed using Redux Toolkit Query.
-
-For example:
-
-```js
-getProducts: builder.query({
-  query: () => "/products",
-}),
-
-getProduct: builder.query({
-  query: (id) => `/products/${id}`,
-}),
-```
-
-The generated hooks can then be used inside React components:
-
-```js
-const { data, isLoading, error } = useGetProductsQuery();
-```
-
-For a single product:
-
-```js
-const { data, isLoading, error } = useGetProductQuery(id);
-```
-
-## Project Structure
-
-```text
-src/
-├── api/
-│   └── fakeStoreApi.js
-├── components/
-├── pages/
-├── store/
-├── App.jsx
-└── main.jsx
-```
-
-## Purpose
-
-This project is mainly for practicing:
-
-* React
-* Tailwind CSS
-* Redux Toolkit
-* RTK Query
-* API integration
-* Reusable components
-* Working with external APIs
-# Fake Store
-
-A React e-commerce application built with **React**, **Redux Toolkit Query (RTK Query)**, and **Tailwind CSS**.
-
-The project uses the [Fake Store API](https://fakestoreapi.com/) to retrieve product information.
-
-## Technologies
-
-* React
-* Vite
-* Redux Toolkit
-* RTK Query
-* Tailwind CSS
-* JavaScript
-
-## Features
-
-* Fetch all products from the Fake Store API
-* Fetch an individual product by ID
-* Manage API requests with RTK Query
-* Loading and API state management
-* Responsive UI with Tailwind CSS
+For the Vercel frontend, set the runtime environment variable `SHOPCO_API_URL` to the origin of the deployed Express API, for example `https://shopco-api.example.com`. The Vercel function at `/api/auth/*` proxies account requests and session cookies to that API, keeping the browser connection same-origin.
 
 ## API
 
-This project uses the Fake Store API:
+The Express service provides:
 
 ```text
-https://fakestoreapi.com
+POST /api/auth/signup
+POST /api/auth/login
+GET  /api/auth/me
+POST /api/auth/logout
 ```
 
-### Get all products
-
-```text
-GET /products
-```
-
-### Get a single product
-
-```text
-GET /products/:id
-```
-
-## Installation
-
-Clone the repository:
-
-```bash
-git clone <your-repository-url>
-```
-
-Navigate into the project:
-
-```bash
-cd <project-name>
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-The application will then be available at the local URL provided by Vite.
-
-## Environment Variables
-
-Create a `.env` file in the root of the project:
-
-```env
-VITE_APP_BASEURL=https://fakestoreapi.com
-```
-
-The application uses this value as the base URL for API requests.
-
-## RTK Query
-
-API requests are managed using Redux Toolkit Query.
-
-For example:
-
-```js
-getProducts: builder.query({
-  query: () => "/products",
-}),
-
-getProduct: builder.query({
-  query: (id) => `/products/${id}`,
-}),
-```
-
-The generated hooks can then be used inside React components:
-
-```js
-const { data, isLoading, error } = useGetProductsQuery();
-```
-
-For a single product:
-
-```js
-const { data, isLoading, error } = useGetProductQuery(id);
-```
-
-## Project Structure
-
-```text
-src/
-├── api/
-│   └── fakeStoreApi.js
-├── components/
-├── pages/
-├── store/
-├── App.jsx
-└── main.jsx
-```
-
-## Purpose
-
-This project is mainly for practicing:
-
-* React
-* Tailwind CSS
-* Redux Toolkit
-* RTK Query
-* API integration
-* Reusable components
-* Working with external APIs
+Passwords are stored as salted hashes, and sessions are stored in SQLite.

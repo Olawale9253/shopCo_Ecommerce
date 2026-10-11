@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const URL = import.meta.env.VITE_API_BASE_URL;
+const URL = import.meta.env.VITE_API_BASE_URL || "https://dummyjson.com";
 const fashionCategories = new Set([
   "mens-shirts",
   "mens-shoes",
@@ -38,21 +38,12 @@ export const fakeStoreApi = createApi({
 
     getFashionProducts: builder.query({
       async queryFn(_arg, _api, _extraOptions, fetchWithBQ) {
-        const [cartsResult, productsResult] = await Promise.all([
-          fetchWithBQ("/carts"),
-          fetchWithBQ("/products?limit=0"),
-        ]);
-
-        if (cartsResult.error) return { error: cartsResult.error };
+        const productsResult = await fetchWithBQ("/products?limit=0");
         if (productsResult.error) return { error: productsResult.error };
-
-        const cartProductIds = new Set(
-          cartsResult.data.carts.flatMap((cart) => cart.products.map((product) => product.id)),
-        );
 
         return {
           data: productsResult.data.products
-            .filter((product) => cartProductIds.has(product.id) && fashionCategories.has(product.category))
+            .filter((product) => fashionCategories.has(product.category))
             .map(normalizeProduct),
         };
       },
